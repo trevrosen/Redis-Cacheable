@@ -84,6 +84,11 @@ describe RedisCacheable do
         @tc_instance = subject.new(5)
       end
 
+      it "should know whether a copy is in Redis" do
+        subject._rc_connection.stub(:keys).and_return true
+        @tc_instance.exists_in_redis?.should be_true
+      end
+
       describe "when writing to the cache" do
         describe "without a cache map" do
           before(:each) do
@@ -98,7 +103,7 @@ describe RedisCacheable do
           it "should marshall via to_json if the class responds to that" do
             @tc_instance.stub(:respond_to?).with(:to_json).and_return true
             @tc_instance.should_receive(:to_json)
-            @tc_instance.rc_write
+            @tc_instance.rc_write!
           end
 
           it "should marshall with to_hash.to_json if the class responds to to_hash but not to_json" do
@@ -107,7 +112,7 @@ describe RedisCacheable do
             @tc_instance.stub(:respond_to?).with(:to_hash).and_return true
             @tc_instance.should_receive(:to_hash).and_return foo_hash
             foo_hash.should_receive(:to_json)
-            @tc_instance.rc_write
+            @tc_instance.rc_write!
           end
           
         end

@@ -1,16 +1,17 @@
 module RedisCacheable
+
+  CONFIG_OPTIONS = [
+    :namespace,
+    :key_method,
+    :cache_map
+  ]
+
   def self.included(base)
     base.class_eval do
       @rc_config = {}
 
       class << self
-        RC_CONFIG_OPTIONS = [
-          :namespace,
-          :key_method,
-          :cache_map
-        ]
-
-        RC_CONFIG_OPTIONS.each do |option_name|
+        CONFIG_OPTIONS.each do |option_name|
           # setters
           define_method("rc_#{option_name}") do |option_setting|
             @rc_config[option_name] = option_setting
@@ -34,7 +35,7 @@ module RedisCacheable
       # --------------------------------
 
 
-      def rc_write
+      def rc_write!
        if self.class._rc_cache_map.nil?
          if self.respond_to? :to_json
            self.class._rc_connection.set(rc_cache_key, self.to_json)
@@ -53,6 +54,10 @@ module RedisCacheable
 
       def rc_read
         
+      end
+      
+      def exists_in_redis?
+        self.class._rc_connection.keys(rc_cache_key)
       end
 
       def rc_cache_key
