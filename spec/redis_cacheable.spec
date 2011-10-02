@@ -64,8 +64,9 @@ describe RedisCacheable do
       end
 
       it "should allow getting and setting the cache map" do
-        subject.send(:rc_cache_map, "foo_id")
-        subject._rc_cache_map.should == "foo_id"
+        cache_map = {:boo => "bizz"}
+        subject.send(:rc_cache_map, cache_map)
+        subject._rc_cache_map.should == cache_map
       end
 
       it "should create a Redis connection with Redis::Namespace" do
