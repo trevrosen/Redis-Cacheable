@@ -25,9 +25,6 @@ module RedisCacheable
         end
 
         # -- "private" ----
-        def _rc_config
-          @rc_config
-        end
 
         def _rc_connection
           @rc_config[:connection] ||= Redis::Namespace.new(@rc_config[:namespace], :redis => $redis)
@@ -42,15 +39,19 @@ module RedisCacheable
 
 
       def rc_write
-       if self.class._rc_config[:cache_map].nil?
+       if self.class._rc_cache_map.nil?
          if self.respond_to? :to_json
            self.class._rc_connection.set(rc_cache_key, self.to_json)
          elsif self.respond_to? :to_hash
            self.class._rc_connection.set(rc_cache_key, self.to_hash.to_json)
          else
-            # assume cache map is instance variables
-            # TODO: what could be bad about that? 
+           # build by calling to_json on each instance variable
+           # NOTE: how expensive is this?
          end
+
+       # assume cache map is instance variables
+       # TODO: what could be bad about that? 
+       else
        end
       end
 
@@ -59,7 +60,7 @@ module RedisCacheable
       end
 
       def rc_cache_key
-        self.send(self.class._rc_config[:key_method]).to_s
+        self.send(self.class._rc_key_method).to_s
       end
 
       
