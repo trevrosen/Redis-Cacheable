@@ -4,27 +4,23 @@ module RedisCacheable
       @rc_config = {}
 
       class << self
-        method_prefix = "rc"
-
-        config_options = [
+        RC_CONFIG_OPTIONS = [
           :namespace,
           :key_method,
           :cache_map
         ]
 
-        config_options.each do |option_name|
-          setter_name = "#{method_prefix}_#{option_name}"
-          define_method(setter_name) do |option_setting|
+        RC_CONFIG_OPTIONS.each do |option_name|
+          # setters
+          define_method("rc_#{option_name}") do |option_setting|
             @rc_config[option_name] = option_setting
           end
 
-          getter_name = "_#{method_prefix}_#{option_name}"
-          define_method(getter_name) do
+          # getters
+          define_method("_rc_#{option_name}") do
             @rc_config[option_name]
           end
         end
-
-        # -- "private" ----
 
         def _rc_connection
           @rc_config[:connection] ||= Redis::Namespace.new(@rc_config[:namespace], :redis => $redis)

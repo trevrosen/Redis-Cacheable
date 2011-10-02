@@ -27,6 +27,24 @@ describe RedisCacheable do
 
   subject{testclass1}
 
+  describe "when it is included into two classes" do
+    before(:each) do
+      testclass2.send(:include, RedisCacheable)
+      subject.send(:include, RedisCacheable)
+    
+      testclass2.send(:rc_namespace, "class1")
+      subject.send(:rc_namespace, "class2")
+    end
+
+    it "they should have different connections" do
+      testclass2._rc_connection.should_not eql subject._rc_connection
+    end
+
+    it "they should have different namespaces" do
+      testclass2._rc_namespace.should_not eql subject._rc_namespace
+    end
+  end
+
 
   describe "when it is included into a class" do
     before(:each) do
