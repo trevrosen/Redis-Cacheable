@@ -65,7 +65,7 @@ module RedisCacheable
         when :string
           self.class._rc_connection.get(rc_cache_key)
         else :none
-          fail "Nothing in Redis"
+          []
         end
       end
 

@@ -104,6 +104,11 @@ describe RedisCacheable do
         @tc_instance.type_in_redis.should == :none
       end
 
+      it "should return an empty array for #redis_data if there's nothing in Redis" do
+        subject._rc_connection.stub(:type).and_return :none
+        @tc_instance.redis_data.should == []
+      end
+
       describe "when reading from the cache" do
         before(:each) do
           @hash_from_redis   = {:foo=>"bacon", :bar=>"pumpkin pie", :baz=>"sewer rat"}
