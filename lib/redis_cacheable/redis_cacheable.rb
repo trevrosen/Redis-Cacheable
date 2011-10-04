@@ -48,16 +48,33 @@ module RedisCacheable
        end
       end
 
-      def rc_read
-        
+      def rc_read!
+        r_data = redis_data
+        case r_data
+        when String
+          self.class.new(ActiveSupport::JSON.decode(r_data))
+        when Hash
+          self.class.new(r_data)
+        end
       end
       
+      def redis_data
+        case type_in_redis
+        when :hash
+          self.class._rc_connection.hgetall(rc_cache_key)
+        when :string
+          self.class._rc_connection.get(rc_cache_key)
+        else :none
+          fail "Nothing in Redis"
+        end
+      end
+
       def exists_in_redis?
         self.class._rc_connection.keys(rc_cache_key)
       end
 
       def type_in_redis
-        self.class._rc_connection.type(rc_cache_key)
+        self.class._rc_connection.type(rc_cache_key).to_sym
       end
 
       def rc_cache_key

@@ -60,7 +60,6 @@ describe RedisCacheable do
       it "should allow getting and setting the key method" do
         subject.send(:rc_key_method, "fooid")
         subject._rc_key_method.should == "fooid"
-        
       end
 
       it "should allow getting and setting the cache map" do
@@ -91,18 +90,34 @@ describe RedisCacheable do
       end
 
       it "should know if the Redis data is a string" do
-        subject._rc_connection.stub(:type).and_return "string"
-        @tc_instance.type_in_redis.should == "string"
+        subject._rc_connection.stub(:type).and_return :string
+        @tc_instance.type_in_redis.should == :string
       end
 
       it "should know if the Redis data is a hash" do
-        subject._rc_connection.stub(:type).and_return "hash"
-        @tc_instance.type_in_redis.should == "hash"
+        subject._rc_connection.stub(:type).and_return :hash
+        @tc_instance.type_in_redis.should == :hash
       end
 
       it "should know if the Redis data is non-existent" do
-        subject._rc_connection.stub(:type).and_return "none"
-        @tc_instance.type_in_redis.should == "none"
+        subject._rc_connection.stub(:type).and_return :none
+        @tc_instance.type_in_redis.should == :none
+      end
+
+      describe "when reading from the cache" do
+        before(:each) do
+          @hash_from_redis   = {:foo=>"bacon", :bar=>"pumpkin pie", :baz=>"sewer rat"}
+          @string_from_redis = "{\"foo\":\"bacon\",\"bar\":\"pumpkin pie\",\"baz\":\"sewer rat\"}"
+          $redis.stub(:get).and_return @string_from_redis
+          $redis.stub(:hgetall).and_return @hash_from_redis
+        end
+
+        it "should decode the JSON if the type is String" do
+          @tc_instance.stub(:redis_data).and_return @string_from_redis
+          ActiveSupport::JSON.should_receive(:decode)
+          @tc_instance.rc_read!
+        end
+        
       end
 
       describe "when writing to the cache" do
