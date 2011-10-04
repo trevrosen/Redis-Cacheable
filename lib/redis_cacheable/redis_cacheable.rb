@@ -12,12 +12,10 @@ module RedisCacheable
 
       class << self
         CONFIG_OPTIONS.each do |option_name|
-          # setters
           define_method("rc_#{option_name}") do |option_setting|
             @rc_config[option_name] = option_setting
           end
 
-          # getters
           define_method("_rc_#{option_name}") do
             @rc_config[option_name]
           end
@@ -26,7 +24,6 @@ module RedisCacheable
         def _rc_connection
           @rc_config[:connection] ||= Redis::Namespace.new(@rc_config[:namespace], :redis => $redis)
         end
-
       end # end class methods
 
 
@@ -47,7 +44,6 @@ module RedisCacheable
          end
 
        # assume cache map is instance variables
-       # TODO: what could be bad about that? 
        else
        end
       end
@@ -58,6 +54,10 @@ module RedisCacheable
       
       def exists_in_redis?
         self.class._rc_connection.keys(rc_cache_key)
+      end
+
+      def type_in_redis
+        self.class._rc_connection.type(rc_cache_key)
       end
 
       def rc_cache_key

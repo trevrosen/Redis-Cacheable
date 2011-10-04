@@ -90,6 +90,21 @@ describe RedisCacheable do
         @tc_instance.exists_in_redis?.should be_true
       end
 
+      it "should know if the Redis data is a string" do
+        subject._rc_connection.stub(:type).and_return "string"
+        @tc_instance.type_in_redis.should == "string"
+      end
+
+      it "should know if the Redis data is a hash" do
+        subject._rc_connection.stub(:type).and_return "hash"
+        @tc_instance.type_in_redis.should == "hash"
+      end
+
+      it "should know if the Redis data is non-existent" do
+        subject._rc_connection.stub(:type).and_return "none"
+        @tc_instance.type_in_redis.should == "none"
+      end
+
       describe "when writing to the cache" do
         describe "without a cache map" do
           before(:each) do
