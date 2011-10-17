@@ -33,19 +33,27 @@ module RedisCacheable
 
 
       def rc_write!
-       if self.class._rc_cache_map.nil?
-         if self.respond_to? :to_json
-           self.class._rc_connection.set(rc_cache_key, self.to_json)
-         elsif self.respond_to? :to_hash
-           self.class._rc_connection.set(rc_cache_key, self.to_hash.to_json)
-         else
-           # build by calling to_json on each instance variable
-           # NOTE: how expensive is this?
-         end
+        self.class._rc_connection.multi do
+          rc_decide_and_write
+        end
+      end
 
-       # assume cache map is instance variables
-       else
-       end
+      # Don't use directly -- use rc_write! for transactional Redis write
+      def rc_decide_and_write!
+        if self.class._rc_cache_map.nil?
+          if self.respond_to? :to_json
+            self.class._rc_connection.set(rc_cache_key, self.to_json)
+          elsif self.respond_to? :to_hash
+            self.class._rc_connection.set(rc_cache_key, ActiveSupport::JSON.encode(self.to_hash))
+          else
+            raise RedisCacheable::MaplessClassError, "can't handle without cache_map or to_hash/to_json"
+          end
+        else # cache_map is non-nil
+          self.class._rc_cache_map.keys.each do |ivar|
+            rc_store_ivar!(ivar)
+          end
+
+        end
       end
 
       def rc_read!
@@ -79,6 +87,10 @@ module RedisCacheable
 
       def rc_cache_key
         self.send(self.class._rc_key_method).to_s
+      end
+
+      def rc_store_ivar!(ivar)
+        self.class._rc_connection.hset(rc_cache_key, ivar, self.instance_variable_get("@#{ivar}").to_json)
       end
 
       

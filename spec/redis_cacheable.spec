@@ -8,9 +8,12 @@ describe RedisCacheable do
   let(:testclass1){
     Class.new do
       attr_accessor :id, :foo, :bar, :baz
+      attr_accessor :some_string, :some_hash
 
-      def initialize(id)
+      def initialize(id, some_string="", some_hash={})
         @id = id
+        @some_string = some_string
+        @some_hash = some_hash
       end
     end
   }
@@ -81,7 +84,11 @@ describe RedisCacheable do
 
       before(:each) do
         subject.send(:rc_key_method, :id)
-        @tc_instance = subject.new(5)
+        @tc_instance = subject.new(5, "a string of stuff", {:this => "yeah", :that => "boo!"})
+      end
+
+      it "should use its cache key" do
+        @tc_instance.rc_cache_key.should == "5"
       end
 
       it "should know whether a copy is in Redis" do
@@ -132,24 +139,45 @@ describe RedisCacheable do
             $redis.stub(:set).and_return true
           end
 
-          it "should use its cache key" do
-            @tc_instance.rc_cache_key.should == "5"
+
+          describe "when self responds to to_json" do
+            before(:each) do
+              @tc_instance.stub(:respond_to?).with(:to_json).and_return true
+            end
+            
+            it "should marshall via to_json if the class responds to that" do
+              @tc_instance.should_receive(:to_json)
+              @tc_instance.rc_decide_and_write!
+            end
           end
 
-          it "should marshall via to_json if the class responds to that" do
-            @tc_instance.stub(:respond_to?).with(:to_json).and_return true
-            @tc_instance.should_receive(:to_json)
-            @tc_instance.rc_write!
+          describe "when self respond to to_hash but not to_json" do
+            before(:each) do
+              @tc_instance.stub(:respond_to?).with(:to_json).and_return false
+              @tc_instance.stub(:respond_to?).with(:to_hash).and_return true
+            end
+
+            it "should marshall with to_hash if the class responds to to_hash but not to_json" do
+              foo_hash = {:foo => "bar"}
+              @tc_instance.should_receive(:to_hash).and_return foo_hash
+              ActiveSupport::JSON.should_receive(:encode)
+              @tc_instance.rc_decide_and_write!
+            end
           end
 
-          it "should marshall with to_hash.to_json if the class responds to to_hash but not to_json" do
-            foo_hash = {:foo => "bar"}
-            @tc_instance.stub(:respond_to?).with(:to_json).and_return false
-            @tc_instance.stub(:respond_to?).with(:to_hash).and_return true
-            @tc_instance.should_receive(:to_hash).and_return foo_hash
-            foo_hash.should_receive(:to_json)
-            @tc_instance.rc_write!
+          describe "when self responds to neither to_json nor to_hash" do
+            before(:each) do
+              @tc_instance.stub(:respond_to?).with(:to_json).and_return false
+              @tc_instance.stub(:respond_to?).with(:to_hash).and_return false
+            end
+            
+            it "should raise an exception" do
+              expect{@tc_instance.rc_decide_and_write!}.to raise_error(RedisCacheable::MaplessClassError)
+
+            end
           end
+
+
           
         end
       end
