@@ -48,11 +48,10 @@ module RedisCacheable
           else
             raise RedisCacheable::MaplessClassError, "can't handle without cache_map or to_hash/to_json"
           end
-        else # cache_map is non-nil
+        else
           self.class._rc_cache_map.keys.each do |ivar|
             rc_store_ivar!(ivar)
           end
-
         end
       end
 
@@ -92,7 +91,6 @@ module RedisCacheable
       def rc_store_ivar!(ivar)
         self.class._rc_connection.hset(rc_cache_key, ivar, self.instance_variable_get("@#{ivar}").to_json)
       end
-
       
     end #class_eval
   end
