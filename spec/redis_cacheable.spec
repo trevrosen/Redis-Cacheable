@@ -177,7 +177,7 @@ describe RedisCacheable do
             end
             
             it "should raise an exception" do
-              expect{@tc_instance.rc_convert_and_write!}.to raise_error(RedisCacheable::MaplessClassError)
+              expect{@tc_instance.rc_convert_and_write!}.to raise_error(RedisCacheable::NonConvertableClassError)
             end
           end
           

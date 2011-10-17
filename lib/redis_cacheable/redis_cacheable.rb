@@ -46,7 +46,7 @@ module RedisCacheable
           elsif self.respond_to? :to_hash
             self.class._rc_connection.set(rc_cache_key, ActiveSupport::JSON.encode(self.to_hash))
           else
-            raise RedisCacheable::MaplessClassError, "can't handle without cache_map or to_hash/to_json"
+            raise RedisCacheable::NonConvertableClassError
           end
         else
           self.class._rc_cache_map.keys.each do |ivar|

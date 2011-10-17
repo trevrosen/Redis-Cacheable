@@ -7,5 +7,5 @@ require "redis-namespace"
 
 
 module RedisCacheable
-  class MaplessClassError < Exception; end
+  class NonConvertableClassError < Exception; end
 end
