@@ -34,7 +34,7 @@ module RedisCacheable
 
       def rc_write!
         self.class._rc_connection.multi do
-          rc_decide_and_write
+          rc_convert_and_write!
         end
       end
 
