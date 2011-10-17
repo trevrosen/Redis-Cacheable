@@ -2,7 +2,8 @@
 
 Nothing to see here just yet.  Move along.  Move along.
 
-When it's ready, here's the basics of what RC will provide:
+If you're deadset on NOT moving along, here's a breakdown of the
+library's basic purpose:
 
 RedisCacheable offers a generic way to cache objects that are basically
 composites of scalars, strings, and other data that can be converted to
