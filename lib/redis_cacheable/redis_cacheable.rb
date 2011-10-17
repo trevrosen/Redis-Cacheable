@@ -39,7 +39,7 @@ module RedisCacheable
       end
 
       # Don't use directly -- use rc_write! for transactional Redis write
-      def rc_decide_and_write!
+      def rc_convert_and_write!
         if self.class._rc_cache_map.nil?
           if self.respond_to? :to_json
             self.class._rc_connection.set(rc_cache_key, self.to_json)

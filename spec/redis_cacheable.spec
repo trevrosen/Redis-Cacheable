@@ -147,7 +147,7 @@ describe RedisCacheable do
             
             it "should marshall via to_json if the class responds to that" do
               @tc_instance.should_receive(:to_json)
-              @tc_instance.rc_decide_and_write!
+              @tc_instance.rc_convert_and_write!
             end
           end
 
@@ -161,7 +161,7 @@ describe RedisCacheable do
               foo_hash = {:foo => "bar"}
               @tc_instance.should_receive(:to_hash).and_return foo_hash
               ActiveSupport::JSON.should_receive(:encode)
-              @tc_instance.rc_decide_and_write!
+              @tc_instance.rc_convert_and_write!
             end
           end
 
@@ -172,7 +172,7 @@ describe RedisCacheable do
             end
             
             it "should raise an exception" do
-              expect{@tc_instance.rc_decide_and_write!}.to raise_error(RedisCacheable::MaplessClassError)
+              expect{@tc_instance.rc_convert_and_write!}.to raise_error(RedisCacheable::MaplessClassError)
 
             end
           end
