@@ -133,6 +133,11 @@ describe RedisCacheable do
       end
 
       describe "when writing to the cache" do
+        it "should use a multi block to keep things transactional" do
+          subject._rc_connection.should_receive(:multi)
+          @tc_instance.rc_write!
+        end
+
         describe "without a cache map" do
           before(:each) do
             @tc_instance.class.stub(:_rc_cache_map).and_return nil
