@@ -17,7 +17,7 @@ RC might be a good choice for you if:
 "composite" object
 
 * You're able to implement an updating task on a background queue (such
-  as [delayed_job](tobi/delayed_job) or [Resque](defunkt/resque)
+  as [delayed_job](http://github.com/tobi/delayed_job) or [Resque](http://github.com/defunkt/resque))
 
 * Your main concern is ensuring that end users don't have to wait for
   numbers to be crunched in real time
