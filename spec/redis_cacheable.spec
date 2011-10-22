@@ -139,10 +139,8 @@ describe RedisCacheable do
 
         describe "without a cache map" do
           before(:each) do
-            @tc_instance.class.stub(:_rc_cache_map).and_return nil
             $redis.stub(:set).and_return true
           end
-
 
           describe "when self responds to to_json" do
             before(:each) do

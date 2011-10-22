@@ -28,16 +28,17 @@ module RedisCacheable
 
       # Don't use directly -- use rc_write! for transactional Redis write
       def rc_convert_and_write!
-        if self.class._rc_cache_map.nil?
+        if self.class.rc_config.cache_map.nil?
           if self.respond_to? :to_json
             self.class._rc_connection.set(rc_cache_key, self.to_json)
           elsif self.respond_to? :to_hash
+            puts "Going to call encode!"
             self.class._rc_connection.set(rc_cache_key, ActiveSupport::JSON.encode(self.to_hash))
           else
             raise RedisCacheable::NonConvertableClassError
           end
         else
-          self.class._rc_cache_map.keys.each do |ivar|
+          self.class.rc_config.cache_map.keys.each do |ivar|
             rc_store_ivar!(ivar)
           end
         end
