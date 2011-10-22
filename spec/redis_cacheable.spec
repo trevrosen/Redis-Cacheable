@@ -34,9 +34,6 @@ describe RedisCacheable do
     before(:each) do
       testclass2.send(:include, RedisCacheable)
       subject.send(:include, RedisCacheable)
-    
-      testclass2.send(:rc_namespace, "class1")
-      subject.send(:rc_namespace, "class2")
     end
 
     it "they should have different connections" do
@@ -44,7 +41,7 @@ describe RedisCacheable do
     end
 
     it "they should have different namespaces" do
-      testclass2._rc_namespace.should_not eql subject._rc_namespace
+      testclass2.rc_config.namespace.should_not eql subject.rc_config.namespace
     end
   end
 
@@ -55,24 +52,17 @@ describe RedisCacheable do
     end
     
     describe "the class" do
-      it "should allow getting and setting the namespace" do
-        subject.send(:rc_namespace, "foospace")
-        subject._rc_namespace.should == "foospace"
-      end
+      let(:the_rc_config){subject.rc_config}
 
-      it "should allow getting and setting the key method" do
-        subject.send(:rc_key_method, "fooid")
-        subject._rc_key_method.should == "fooid"
-      end
-
-      it "should allow getting and setting the cache map" do
-        cache_map = {:boo => "bizz"}
-        subject.send(:rc_cache_map, cache_map)
-        subject._rc_cache_map.should == cache_map
+      [:namespace, :key_method, :cache_map].each do |method_name|
+        it "should be able to get and set '#{method_name}'" do
+          the_rc_config.send("#{method_name}=", "foothing")
+          subject.rc_config.send("#{method_name}").should == "foothing"
+        end
       end
 
       it "should create a Redis connection with Redis::Namespace" do
-        subject.send(:rc_namespace, "foospace")
+        the_rc_config.namespace = "foospace"
         Redis::Namespace.should_receive(:new).with("foospace", :redis => $redis)
         subject._rc_connection
       end
@@ -80,11 +70,15 @@ describe RedisCacheable do
     end
     
     describe "the instances" do
+      let(:the_rc_config){subject.rc_config}
       let(:redis_connection) {Redis::Namespace.new("foospace", :redis => $redis)}
 
       before(:each) do
-        subject.send(:rc_key_method, :id)
         @tc_instance = subject.new(5, "a string of stuff", {:this => "yeah", :that => "boo!"})
+      end
+
+      it "should use 'id' for the default key method" do
+        @tc_instance.class.rc_config.key_method.should == :id
       end
 
       it "should use its cache key" do

@@ -1,30 +1,18 @@
 module RedisCacheable
-
-  CONFIG_OPTIONS = [
-    :namespace,
-    :key_method,
-    :cache_map
-  ]
-
   def self.included(base)
     base.class_eval do
-      @rc_config = {}
+      @rc_config = Config.new
+      @rc_config.namespace  = ActiveSupport::Inflector.underscore(base)
+      @rc_config.key_method = :id
+      
+      def self.rc_config
+        @rc_config
+      end
 
-      class << self
-        CONFIG_OPTIONS.each do |option_name|
-          define_method("rc_#{option_name}") do |option_setting|
-            @rc_config[option_name] = option_setting
-          end
-
-          define_method("_rc_#{option_name}") do
-            @rc_config[option_name]
-          end
-        end
-
-        def _rc_connection
-          @rc_config[:connection] ||= Redis::Namespace.new(@rc_config[:namespace], :redis => $redis)
-        end
-      end # end class methods
+      def self._rc_connection
+        redis_instance = defined?($redis) ? $redis : Redis.new
+        @rc_config.redis_connection ||= Redis::Namespace.new(@rc_config.namespace, :redis => redis_instance)
+      end
 
 
       # --------------------------------
@@ -85,7 +73,7 @@ module RedisCacheable
       end
 
       def rc_cache_key
-        self.send(self.class._rc_key_method).to_s
+        self.send(self.class.rc_config.key_method).to_s
       end
 
       def rc_store_ivar!(ivar)
