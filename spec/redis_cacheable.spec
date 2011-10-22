@@ -62,6 +62,7 @@ describe RedisCacheable do
       end
 
       it "should create a Redis connection with Redis::Namespace" do
+        p subject
         the_rc_config.namespace = "foospace"
         Redis::Namespace.should_receive(:new).with("foospace", :redis => $redis)
         subject._rc_connection

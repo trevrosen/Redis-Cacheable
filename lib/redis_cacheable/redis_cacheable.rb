@@ -2,7 +2,7 @@ module RedisCacheable
   def self.included(base)
     base.class_eval do
       @rc_config = Config.new
-      @rc_config.namespace  = ActiveSupport::Inflector.underscore(base)
+      @rc_config.namespace  = Util.underscore(base) 
       @rc_config.key_method = :id
       
       def self.rc_config
