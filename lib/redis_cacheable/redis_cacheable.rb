@@ -32,7 +32,6 @@ module RedisCacheable
           if self.respond_to? :to_json
             self.class._rc_connection.set(rc_cache_key, self.to_json)
           elsif self.respond_to? :to_hash
-            puts "Going to call encode!"
             self.class._rc_connection.set(rc_cache_key, ActiveSupport::JSON.encode(self.to_hash))
           else
             raise RedisCacheable::NonConvertableClassError
