@@ -15,8 +15,7 @@ module RedisCacheable
         ActiveSupport::Inflector.underscore(base)
       end
 
-      def classify(class_string)
-        ActiveSupport::Inflector.classify(class_string)
+      def class_name_from_key_string(key_string)
       end
     end
   end
