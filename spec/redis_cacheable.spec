@@ -30,7 +30,7 @@ describe RedisCacheable do
 
   subject{testclass1}
 
-  describe "when it is included into two classes" do
+  describe "when it is included into multiple classes" do
     before(:each) do
       testclass2.send(:include, RedisCacheable)
       subject.send(:include, RedisCacheable)
@@ -96,39 +96,15 @@ describe RedisCacheable do
         @tc_instance.exists_in_redis?.should be_false
       end
 
-      it "should know if the Redis data is a string" do
-        subject._rc_connection.stub(:type).and_return :string
-        @tc_instance.type_in_redis.should == :string
-      end
-
-      it "should know if the Redis data is a hash" do
-        subject._rc_connection.stub(:type).and_return :hash
-        @tc_instance.type_in_redis.should == :hash
-      end
-
-      it "should know if the Redis data is non-existent" do
-        subject._rc_connection.stub(:type).and_return :none
-        @tc_instance.type_in_redis.should == :none
-      end
-
-      it "should return an empty array for #redis_data if there's nothing in Redis" do
-        subject._rc_connection.stub(:type).and_return :none
-        @tc_instance.redis_data.should == []
+      it "should return an empty string for #redis_string if there's nothing in Redis" do
+        subject._rc_connection.stub(:keys).and_return []
+        @tc_instance.redis_string.should == ""
       end
 
       describe "when reading from the cache" do
         before(:each) do
-          @hash_from_redis   = {:foo=>"bacon", :bar=>"pumpkin pie", :baz=>"sewer rat"}
-          @string_from_redis = "{\"foo\":\"bacon\",\"bar\":\"pumpkin pie\",\"baz\":\"sewer rat\"}"
-          $redis.stub(:get).and_return @string_from_redis
-          $redis.stub(:hgetall).and_return @hash_from_redis
         end
 
-        it "should decode the JSON if the type is String" do
-          @tc_instance.stub(:redis_data).and_return @string_from_redis
-          ActiveSupport::JSON.should_receive(:decode)
-          @tc_instance.rc_read!
-        end
         
       end
 
@@ -138,52 +114,19 @@ describe RedisCacheable do
           @tc_instance.rc_write!
         end
 
-        describe "without a cache map" do
+
+
+        describe "when the object contains things Marshal can't deal with " do
           before(:each) do
-            $redis.stub(:set).and_return true
-          end
-
-          describe "when self responds to to_json" do
-            before(:each) do
-              @tc_instance.stub(:respond_to?).with(:to_json).and_return true
-            end
-            
-            it "should marshall via to_json if the class responds to that" do
-              @tc_instance.should_receive(:to_json)
-              @tc_instance.rc_convert_and_write!
-            end
-          end
-
-          describe "when self respond to to_hash but not to_json" do
-            before(:each) do
-              @tc_instance.stub(:respond_to?).with(:to_json).and_return false
-              @tc_instance.stub(:respond_to?).with(:to_hash).and_return true
-            end
-
-            it "should marshall with to_hash if the class responds to to_hash but not to_json" do
-              foo_hash = {:foo => "bar"}
-              @tc_instance.should_receive(:to_hash).and_return foo_hash
-              ActiveSupport::JSON.should_receive(:encode)
-              @tc_instance.rc_convert_and_write!
-            end
-          end
-
-          describe "when self responds to neither to_json nor to_hash" do
-            before(:each) do
-              @tc_instance.stub(:respond_to?).with(:to_json).and_return false
-              @tc_instance.stub(:respond_to?).with(:to_hash).and_return false
-            end
-            
-            it "should raise an exception" do
-              expect{@tc_instance.rc_convert_and_write!}.to raise_error(RedisCacheable::NonConvertableClassError)
-            end
           end
           
+          it "should raise an exception" do
+            #expect{@tc_instance.rc_convert_and_write!}.to raise_error(RedisCacheable::NonConvertableClassError)
+            pending
+          end
         end
       end
-
     end
-    
   end
 
   
