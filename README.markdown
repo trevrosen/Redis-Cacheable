@@ -1,10 +1,5 @@
 #Redis Cacheable
 
-Nothing to see here just yet.  Move along.  Move along.
-
-If you're deadset on NOT moving along, here's a breakdown of the
-library's basic purpose:
-
 RedisCacheable offers a generic way to cache Ruby objects in Redis in an
 organized way.  It currently uses Ruby's Marshal module, to create
 string representations of object graphs, so the
