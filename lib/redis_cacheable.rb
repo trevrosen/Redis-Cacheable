@@ -8,4 +8,5 @@ require "redis-namespace" # The Redis gem is dependency of redis-namespace
 module RedisCacheable
   class NonConvertableClassError < Exception; end
   class Config < OpenStruct; end
+  class GHTest; end
 end
