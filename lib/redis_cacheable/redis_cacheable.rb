@@ -37,7 +37,7 @@ module RedisCacheable
         Marshal.load marshalled_object
       end
 
-      def rc_read!
+      def rc_read
         rc_load(redis_string)
       end
       
