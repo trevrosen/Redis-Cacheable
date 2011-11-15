@@ -78,6 +78,17 @@ describe RedisCacheable do
         @tc_instance.class.rc_config.key_method.should == :id
       end
 
+      it "should allow the setting of the cache key from an arbitrary method" do
+        the_rc_config.key_method = :foo
+        @tc_instance.foo = "foobar"
+        @tc_instance.rc_cache_key.should == "foobar"
+      end
+
+      it "should use its cache key" do
+        @tc_instance.rc_cache_key.should == "5"
+      end
+
+
       describe "when writing to the cache" do
         
       end
