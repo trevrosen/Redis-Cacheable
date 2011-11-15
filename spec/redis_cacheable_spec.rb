@@ -43,4 +43,46 @@ describe RedisCacheable do
     end
   end
 
+    describe "when it is included into a class" do
+    before(:each) do
+      subject.send(:include, RedisCacheable)
+    end
+    
+    describe "the class" do
+      let(:the_rc_config){subject.rc_config}
+
+      [:namespace, :key_method].each do |method_name|
+        it "should be able to get and set '#{method_name}'" do
+          the_rc_config.send("#{method_name}=", "foothing")
+          subject.rc_config.send("#{method_name}").should == "foothing"
+        end
+      end
+
+      it "should create a Redis connection with Redis::Namespace" do
+        the_rc_config.namespace = "foospace"
+        Redis::Namespace.should_receive(:new).with("foospace", :redis => $redis)
+        subject._rc_connection
+      end
+
+    end
+    
+    describe "the instances" do
+      let(:the_rc_config){subject.rc_config}
+      let(:redis_connection) {Redis::Namespace.new("foospace", :redis => $redis)}
+
+      before(:each) do
+        @tc_instance = subject.new(5)
+      end
+
+      it "should use 'id' for the default key method" do
+        @tc_instance.class.rc_config.key_method.should == :id
+      end
+
+      describe "when writing to the cache" do
+        
+      end
+    end
+  end
+
+
 end
