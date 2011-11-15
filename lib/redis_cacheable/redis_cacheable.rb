@@ -14,6 +14,15 @@ module RedisCacheable
         @rc_config.redis_connection ||= Redis::Namespace.new(@rc_config.namespace, :redis => redis_instance)
       end
 
+      def redis_string
+        return "" unless exists_in_redis?
+        self.class._rc_connection.get(rc_cache_key)
+      end
+
+      def exists_in_redis?
+        !self.class._rc_connection.keys(rc_cache_key).empty?
+      end
+
       def rc_cache_key
         self.send(self.class.rc_config.key_method).to_s
       end

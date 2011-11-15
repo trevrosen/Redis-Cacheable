@@ -88,6 +88,21 @@ describe RedisCacheable do
         @tc_instance.rc_cache_key.should == "5"
       end
 
+      it "should know when a copy is in Redis" do
+        subject._rc_connection.stub(:keys).and_return ["5"]
+        @tc_instance.exists_in_redis?.should be_true
+      end
+      
+      it "should know when a copy is NOT in Redis" do
+        subject._rc_connection.stub(:keys).and_return []
+        @tc_instance.exists_in_redis?.should be_false
+      end
+
+      it "should return an empty string for #redis_string if there's nothing in Redis" do
+        subject._rc_connection.stub(:keys).and_return []
+        @tc_instance.redis_string.should == ""
+      end
+
 
       describe "when writing to the cache" do
         
