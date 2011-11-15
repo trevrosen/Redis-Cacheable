@@ -47,7 +47,7 @@ module RedisCacheable
       end
 
       def exists_in_redis?
-        !self.class._rc_connection.keys(rc_cache_key).empty?
+        self.class._rc_connection.exists(rc_cache_key)
       end
 
       def rc_cache_key

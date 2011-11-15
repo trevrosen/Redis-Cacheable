@@ -90,17 +90,17 @@ describe RedisCacheable do
       end
 
       it "should know when a copy is in Redis" do
-        subject._rc_connection.stub(:keys).and_return ["5"]
+        subject._rc_connection.stub(:exists).and_return true
         @tc_instance.exists_in_redis?.should be_true
       end
       
       it "should know when a copy is NOT in Redis" do
-        subject._rc_connection.stub(:keys).and_return []
+        subject._rc_connection.stub(:exists).and_return false
         @tc_instance.exists_in_redis?.should be_false
       end
 
       it "should return an empty string for #redis_string if there's nothing in Redis" do
-        subject._rc_connection.stub(:keys).and_return []
+        subject._rc_connection.stub(:exists).and_return false
         @tc_instance.redis_string.should == ""
       end
 
