@@ -14,6 +14,33 @@ module RedisCacheable
         @rc_config.redis_connection ||= Redis::Namespace.new(@rc_config.namespace, :redis => redis_instance)
       end
 
+      # --------------------------------
+      # -- Instance Methods ------------
+      # --------------------------------
+
+      def rc_write!
+        self.class._rc_connection.multi do
+          rc_convert_and_write!
+        end
+      end
+
+      # Don't use directly -- use rc_write! for transactional Redis write
+      def rc_convert_and_write!
+        self.class._rc_connection.set(rc_cache_key, rc_dump)
+      end
+
+      def rc_dump
+        Marshal.dump self
+      end
+
+      def rc_load(marshalled_object)
+        Marshal.load marshalled_object
+      end
+
+      def rc_read
+        rc_load(redis_string)
+      end
+      
       def redis_string
         return "" unless exists_in_redis?
         self.class._rc_connection.get(rc_cache_key)
@@ -30,3 +57,5 @@ module RedisCacheable
     end #class_eval
   end
 end
+
+

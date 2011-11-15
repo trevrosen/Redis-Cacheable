@@ -43,7 +43,8 @@ describe RedisCacheable do
     end
   end
 
-    describe "when it is included into a class" do
+
+  describe "when it is included into a class" do
     before(:each) do
       subject.send(:include, RedisCacheable)
     end
@@ -103,12 +104,26 @@ describe RedisCacheable do
         @tc_instance.redis_string.should == ""
       end
 
-
       describe "when writing to the cache" do
-        
+        it "should use a multi block to keep things transactional" do
+          subject._rc_connection.should_receive(:multi)
+          @tc_instance.rc_write!
+        end
+
+        describe "when the object contains things Marshal can't deal with " do
+          before(:each) do
+          end
+          
+          it "should raise an exception" do
+            #expect{@tc_instance.rc_write!}.to raise_error(RedisCacheable::NonConvertableClassError)
+            pending
+          end
+        end
       end
     end
   end
 
-
+  
 end
+
+
