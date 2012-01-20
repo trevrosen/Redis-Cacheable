@@ -6,7 +6,6 @@ string representations of object graphs, so the
 consumers of the Redis data must also be Ruby-based applications.  (At some
 point, it would be nice to also be able to support JSON for interop, but
 for right now, it's Ruby-only.)
-Test
 
 The library grew from a business need to provide a way to crunch 
 numbers for a "dashboard" out-of-band from the work required to merely
